@@ -1,26 +1,30 @@
-package com.example.demo.user.entity;
+package com.example.demo.user.vos;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Entity
-@Table(name = "`user`")
-public class User {
+public class UserUpdateVO {
 
-    @Id
-    private UUID id;
+    @Size(min = 3, max = 50)
     private String username;
+    @Email
     private String email;
+
     private String phoneNumber;
+
+    @Size(min = 3, max = 50)
     private String password;
+
+
+
+
+
+
 }
