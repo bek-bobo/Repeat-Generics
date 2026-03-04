@@ -3,6 +3,7 @@ package com.example.demo.user;
 
 import com.example.demo.customExeptionHandler.UserNotFoundException;
 import com.example.demo.user.entity.User;
+import com.example.demo.user.entity.UserStatus;
 import com.example.demo.user.vos.UserCreateVO;
 import com.example.demo.user.vos.UserResponseVO;
 import com.example.demo.user.vos.UserUpdateVO;
@@ -23,11 +24,16 @@ public class UserService {
 
     @Transactional
     public UserResponseVO create(UserCreateVO userCreateVO) {
+        User user = new User();
 
-        User user = modelMapper.map(userCreateVO, User.class);
-        user.setId(UUID.randomUUID());
-        User save = userRepository.save(user);
-        return modelMapper.map(save, UserResponseVO.class);
+        user.setUsername(userCreateVO.getUsername());
+        user.setPassword(userCreateVO.getPassword());
+        user.setEmail(userCreateVO.getEmail());
+        user.setPhoneNumber(userCreateVO.getPhoneNumber());
+        user.setUserStatus(UserStatus.WAITING);
+
+        User saved = userRepository.save(user);
+        return modelMapper.map(saved, UserResponseVO.class);
 
     }
 
@@ -41,7 +47,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseVO getUsers(UUID id) {
+    public UserResponseVO getUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
@@ -52,27 +58,33 @@ public class UserService {
     @Transactional
     public UserResponseVO updateUser(UUID id, UserUpdateVO vo) {
 
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User updatedUser = checkUserData(userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id)), vo);
 
-        if (vo.getUsername() != null){
-            user.setUsername(vo.getUsername());
-        }
-        if (vo.getPassword() != null){
-            user.setPassword(vo.getPassword());
-        }
-        if (vo.getEmail() != null){
-            user.setEmail(vo.getEmail());
-        }
-        if (vo.getPhoneNumber() != null){
-            user.setPhoneNumber(vo.getPhoneNumber());
-        }
-        User saved = userRepository.save(user);
+        User saved = userRepository.save(updatedUser);
         return modelMapper.map(saved, UserResponseVO.class);
 
     }
+
     @Transactional
     public void deleteUser(UUID id) {
         userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         userRepository.deleteById(id);
+    }
+
+    private User checkUserData(User user, UserUpdateVO vo) {
+
+        if (vo.getUsername() != null) {
+            user.setUsername(vo.getUsername());
+        }
+        if (vo.getPassword() != null) {
+            user.setPassword(vo.getPassword());
+        }
+        if (vo.getEmail() != null) {
+            user.setEmail(vo.getEmail());
+        }
+        if (vo.getPhoneNumber() != null) {
+            user.setPhoneNumber(vo.getPhoneNumber());
+        }
+        return user;
     }
 }
