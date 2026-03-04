@@ -1,7 +1,6 @@
 package com.example.demo.user.entity;
 
 import com.example.demo.group.entity.Group;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
