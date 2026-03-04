@@ -57,11 +57,11 @@ public class GroupController {
     }
 
     @DeleteMapping("/delete/user/")
-    public ResponseEntity<Void> deleteUser(@RequestBody DeleteUserFromGroup deleteUserFromGroup) {
+    public ResponseEntity<ActionResponse> deleteUser(@RequestBody DeleteUserFromGroup deleteUserFromGroup) {
 
         groupService.removeUserFromGroup(deleteUserFromGroup);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ActionResponse("User deleted from " + deleteUserFromGroup.getGroupId() + " successfully"));
     }
 
     @DeleteMapping("/{groupId}/cancel")

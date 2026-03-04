@@ -1,6 +1,7 @@
 package com.example.demo.group;
 
 
+import com.example.demo.customExeptionHandler.BusinessRuleException;
 import com.example.demo.customExeptionHandler.GroupNotFoundException;
 import com.example.demo.customExeptionHandler.UserNotFoundException;
 import com.example.demo.group.entity.Group;
@@ -45,7 +46,6 @@ public class GroupService {
         Group group = getGroupOrThrow(addUserToGroupVO.getGroupId());
         User user = getUserOrThrow(addUserToGroupVO.getUserId());
 
-
         validateUserCanBeAdded(group, user);
 
         user.setUserStatus(UserStatus.ACTIVE);
@@ -77,7 +77,7 @@ public class GroupService {
     @Transactional
     public void removeUserFromGroup(DeleteUserFromGroup deleteUserFromGroup) {
 
-        Group group = getGroupOrThrow(deleteUserFromGroup.getUserId());
+        Group group = getGroupOrThrow(deleteUserFromGroup.getGroupId());
         User user = getUserOrThrow(deleteUserFromGroup.getUserId());
 
         if (!group.getUsers().contains(user)) {
@@ -98,9 +98,11 @@ public class GroupService {
             user.setUserStatus(UserStatus.WAITING);
         }
 
-        group.setGroupStatus(GroupStatus.CANCELLED);
+        group.getUsers().clear();
+        groupRepository.delete(group);
     }
 
+    @Transactional
     public List<GroupResponseVO> getAllGroup() {
         return groupRepository.findAll()
                 .stream()
@@ -109,6 +111,7 @@ public class GroupService {
 
     }
 
+    @Transactional
     public List<GroupWithUsersResponseVO> getAllGroupWithUsers() {
         return groupRepository.findAll()
                 .stream()
@@ -141,15 +144,15 @@ public class GroupService {
     private void validateUserCanBeAdded(Group group, User user) {
 
         if (user.getGroup() != null) {
-            throw new IllegalStateException("User already assigned to a group");
+            throw new BusinessRuleException("User already assigned to a group");
         }
 
         if (group.getGroupStatus() != GroupStatus.PLANNED) {
-            throw new IllegalStateException("Cannot add user to started group");
+            throw new BusinessRuleException("Cannot add user to started group");
         }
 
         if (group.getUsers().size() >= group.getMaxUsers()) {
-            throw new IllegalStateException("Group is full");
+            throw new BusinessRuleException("Group is full");
         }
     }
 

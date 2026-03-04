@@ -28,9 +28,7 @@ public class Group {
     @Column(nullable = false)
     private GroupStatus groupStatus;
 
-    @OneToMany(mappedBy = "group",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "group")
     @JsonIgnore
     private List<User> users;
 
