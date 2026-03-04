@@ -10,7 +10,6 @@ import com.example.demo.group.vos.*;
 import com.example.demo.user.UserRepository;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserStatus;
-import com.example.demo.user.vos.UserResponseVO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
