@@ -2,7 +2,6 @@ package com.example.demo.user;
 
 
 import com.example.demo.customExeptionHandler.UserNotFoundException;
-import com.example.demo.group.GroupRepository;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserStatus;
 import com.example.demo.user.vos.UserCreateVO;
@@ -59,7 +58,20 @@ public class UserService {
     @Transactional
     public UserResponseVO updateUser(UUID id, UserUpdateVO vo) {
 
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        User updatedUser = checkUserData(userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id)), vo);
+
+        User saved = userRepository.save(updatedUser);
+        return modelMapper.map(saved, UserResponseVO.class);
+
+    }
+
+    @Transactional
+    public void deleteUser(UUID id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        userRepository.deleteById(id);
+    }
+
+    private User checkUserData(User user, UserUpdateVO vo) {
 
         if (vo.getUsername() != null) {
             user.setUsername(vo.getUsername());
@@ -73,14 +85,6 @@ public class UserService {
         if (vo.getPhoneNumber() != null) {
             user.setPhoneNumber(vo.getPhoneNumber());
         }
-        User saved = userRepository.save(user);
-        return modelMapper.map(saved, UserResponseVO.class);
-
-    }
-
-    @Transactional
-    public void deleteUser(UUID id) {
-        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        userRepository.deleteById(id);
+        return user;
     }
 }

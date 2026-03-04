@@ -40,4 +40,9 @@ public class Group {
         user.setGroup(this);
     }
 
+    public void removeUser(User user) {
+        users.remove(user);
+        user.setGroup(null);
+    }
+
 }

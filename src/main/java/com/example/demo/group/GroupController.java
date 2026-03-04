@@ -1,17 +1,14 @@
 package com.example.demo.group;
 
-import com.example.demo.group.vos.AddUserToGroupVO;
-import com.example.demo.group.vos.GroupCreateVO;
-import com.example.demo.group.vos.GroupResponseVO;
-import com.example.demo.group.vos.GroupWithUsersResponseVO;
+import com.example.demo.group.vos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,5 +31,37 @@ public class GroupController {
                 .body(groupService.addUserToGroup(addUserToGroupVO));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<GroupResponseVO> getGroup(@PathVariable UUID id) {
+        return ResponseEntity.ok(groupService.getGroup(id));
+    }
+
+    @GetMapping("/{id}/users")
+    public ResponseEntity<GroupWithUsersResponseVO> getGroupWithUsers(@PathVariable UUID id) {
+        return ResponseEntity.ok(groupService.getGroupWithUsers(id));
+    }
+
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<GroupResponseVO> updateGroup(@PathVariable UUID id, @RequestBody GroupUpdateVO updateVO){
+        return ResponseEntity.ok(groupService.updateGroup(id,updateVO));
+    }
+
+    @DeleteMapping("/delete/user/")
+    public ResponseEntity<Void> deleteUser(@RequestBody DeleteUserFromGroup deleteUserFromGroup){
+
+        groupService.removeUserFromGroup(deleteUserFromGroup);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{groupId}/cancel")
+    public ResponseEntity<ActionResponse> cancelGroup(
+            @PathVariable UUID groupId) {
+
+        groupService.cancelGroup(groupId);
+        return ResponseEntity.ok(
+                new ActionResponse("Group cancelled successfully")
+        );
+    }
 
 }

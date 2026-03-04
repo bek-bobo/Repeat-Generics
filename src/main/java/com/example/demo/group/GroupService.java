@@ -5,11 +5,8 @@ import com.example.demo.customExeptionHandler.GroupNotFoundException;
 import com.example.demo.customExeptionHandler.UserNotFoundException;
 import com.example.demo.group.entity.Group;
 import com.example.demo.group.entity.GroupStatus;
-import com.example.demo.group.vos.AddUserToGroupVO;
-import com.example.demo.group.vos.GroupCreateVO;
-import com.example.demo.group.vos.GroupResponseVO;
+import com.example.demo.group.vos.*;
 
-import com.example.demo.group.vos.GroupWithUsersResponseVO;
 import com.example.demo.user.UserRepository;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserStatus;
@@ -48,12 +45,71 @@ public class GroupService {
         User user = getUserOrThrow(addUserToGroupVO.getUserId());
 
 
-        validateUserCanBeAdded(group,user);
+        validateUserCanBeAdded(group, user);
 
         user.setUserStatus(UserStatus.ACTIVE);
         group.addUser(user);
 
         return modelMapper.map(group, GroupWithUsersResponseVO.class);
+    }
+
+    @Transactional
+    public GroupResponseVO getGroup(UUID id) {
+        Group group = groupRepository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
+        return modelMapper.map(group, GroupResponseVO.class);
+    }
+
+    @Transactional
+    public GroupWithUsersResponseVO getGroupWithUsers(UUID id) {
+        Group group = groupRepository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
+        return modelMapper.map(group, GroupWithUsersResponseVO.class);
+    }
+
+    @Transactional
+    public GroupResponseVO updateGroup(UUID id, GroupUpdateVO updateVO) {
+        Group group = checkGroupUpdates(getGroupOrThrow(id), updateVO);
+
+        Group saved = groupRepository.save(group);
+        return modelMapper.map(saved, GroupResponseVO.class);
+    }
+
+    @Transactional
+    public void removeUserFromGroup(DeleteUserFromGroup deleteUserFromGroup) {
+
+        Group group = getGroupOrThrow(deleteUserFromGroup.getUserId());
+        User user = getUserOrThrow(deleteUserFromGroup.getUserId());
+
+        if (!group.getUsers().contains(user)) {
+            throw new IllegalStateException("User is not in this group");
+        }
+
+        group.removeUser(user);
+        user.setUserStatus(UserStatus.WAITING);
+    }
+
+    @Transactional
+    public void cancelGroup(UUID groupId) {
+
+        Group group = getGroupOrThrow(groupId);
+
+        for (User user : group.getUsers()) {
+            user.setGroup(null);
+            user.setUserStatus(UserStatus.WAITING);
+        }
+
+        group.setGroupStatus(GroupStatus.CANCELLED);
+    }
+
+
+    private Group checkGroupUpdates(Group group, GroupUpdateVO updateVO) {
+        if (updateVO.getName() != null) {
+            group.setName(updateVO.getName());
+        }
+        if (updateVO.getDescription() != null) {
+            group.setDescription(updateVO.getDescription());
+        }
+
+        return group;
     }
 
     private Group getGroupOrThrow(UUID groupId) {
@@ -80,4 +136,5 @@ public class GroupService {
             throw new IllegalStateException("Group is full");
         }
     }
+
 }

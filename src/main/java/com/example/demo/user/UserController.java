@@ -32,6 +32,7 @@ public class UserController {
 
     @GetMapping("/all")
     public ResponseEntity<List<UserResponseVO>> getAllUser() {
+
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
@@ -39,7 +40,6 @@ public class UserController {
     public ResponseEntity<UserResponseVO> getUser(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getUsers(id));
     }
-
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<UserResponseVO> updateUser(
