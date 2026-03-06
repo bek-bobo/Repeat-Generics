@@ -1,7 +1,8 @@
 package com.example.demo.user;
 
 
-import com.example.demo.customExeptionHandler.UserNotFoundException;
+import com.example.demo.core.customExeptionHandler.UserNotFoundException;
+import com.example.demo.rsql.SpecificationBuilder;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserStatus;
 import com.example.demo.user.vos.UserCreateVO;
@@ -10,9 +11,10 @@ import com.example.demo.user.vos.UserUpdateVO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,12 +40,10 @@ public class UserService {
     }
 
     @Transactional
-    public List<UserResponseVO> getAllUsers() {
+    public Page<UserResponseVO> getAllUsers(String predicate, Pageable pageable) {
 
-        return userRepository.findAll()
-                .stream()
-                .map(user -> modelMapper.map(user, UserResponseVO.class))
-                .toList();
+        return userRepository.findAll(SpecificationBuilder.build(predicate),pageable)
+                .map(user -> modelMapper.map(user, UserResponseVO.class));
     }
 
     @Transactional

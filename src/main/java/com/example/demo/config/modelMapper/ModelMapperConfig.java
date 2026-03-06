@@ -1,4 +1,4 @@
-package com.example.demo.modelMapper;
+package com.example.demo.config.modelMapper;
 
 
 import org.modelmapper.ModelMapper;

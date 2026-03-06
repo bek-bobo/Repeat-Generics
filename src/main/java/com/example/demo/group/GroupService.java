@@ -1,9 +1,9 @@
 package com.example.demo.group;
 
 
-import com.example.demo.customExeptionHandler.BusinessRuleException;
-import com.example.demo.customExeptionHandler.GroupNotFoundException;
-import com.example.demo.customExeptionHandler.UserNotFoundException;
+import com.example.demo.core.customExeptionHandler.BusinessRuleException;
+import com.example.demo.core.customExeptionHandler.GroupNotFoundException;
+import com.example.demo.core.customExeptionHandler.UserNotFoundException;
 import com.example.demo.group.entity.Group;
 import com.example.demo.group.entity.GroupStatus;
 import com.example.demo.group.vos.*;

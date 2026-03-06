@@ -1,4 +1,4 @@
-package com.example.demo.customExeptionHandler.vos;
+package com.example.demo.core.customExeptionHandler.vos;
 
 import java.time.LocalDateTime;
 

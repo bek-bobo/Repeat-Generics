@@ -1,7 +1,7 @@
-package com.example.demo.customExeptionHandler;
+package com.example.demo.core.customExeptionHandler;
 
 
-import com.example.demo.customExeptionHandler.vos.ErrorResponse;
+import com.example.demo.core.customExeptionHandler.vos.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -51,7 +51,7 @@ public class CustomExceptionHandler {
     })
     public ResponseEntity<ErrorResponse> handleBusinessRule(BusinessRuleException ex) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(
                         HttpStatus.CONFLICT.value(),
                         ex.getMessage(),

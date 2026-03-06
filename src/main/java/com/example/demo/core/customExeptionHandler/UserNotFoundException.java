@@ -1,4 +1,4 @@
-package com.example.demo.customExeptionHandler;
+package com.example.demo.core.customExeptionHandler;
 
 
 

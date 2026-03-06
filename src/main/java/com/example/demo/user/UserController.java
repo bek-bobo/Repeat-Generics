@@ -6,11 +6,13 @@ import com.example.demo.user.vos.UserResponseVO;
 import com.example.demo.user.vos.UserUpdateVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,9 +33,11 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserResponseVO>> getAllUser() {
+    public ResponseEntity<Page<UserResponseVO>> getAllUser(
+            @RequestParam (required = false) String predicate,
+            Pageable pageable) {
 
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(userService.getAllUsers(predicate,pageable));
     }
 
     @GetMapping("/{id}")

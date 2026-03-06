@@ -37,6 +37,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    implementation 'cz.jirutka.rsql:rsql-parser:2.1.0'
+
 }
 
 tasks.named('test') {
