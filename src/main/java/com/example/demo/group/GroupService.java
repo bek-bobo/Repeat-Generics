@@ -9,7 +9,7 @@ import com.example.demo.core.repository.CoreRepository;
 import com.example.demo.core.service.CoreService;
 import com.example.demo.group.entity.Group;
 import com.example.demo.group.entity.GroupStatus;
-import com.example.demo.group.mapper.GroupMapper;
+import com.example.demo.group.group.mapper.GroupMapper;
 import com.example.demo.group.vos.*;
 import com.example.demo.rsql.SpecificationBuilder;
 import com.example.demo.user.UserRepository;
@@ -124,7 +124,7 @@ public class GroupService extends CoreService<UUID, Group, GroupResponseVO, Grou
         if (specification == null) {
             pages = groupRepository.findAll(pageable);
         } else {
-            pages = groupRepository.findAll(specification,pageable);
+            pages = groupRepository.findAll(specification, pageable);
         }
 
         return pages.map(groupMapper::toGroupWithUsersResponseVO);

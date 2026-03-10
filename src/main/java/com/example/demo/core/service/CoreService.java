@@ -65,13 +65,13 @@ public abstract class CoreService<ID, ENTITY, RESPONSE_VO, CREATE_VO, UPDATE_VO>
 
     @Transactional
     public void delete(ID id) {
-        getRepository().findById(id)
+        ENTITY entity = getRepository().findById(id)
                 .orElseThrow(
                         () -> new EntityNotFoundException
                                 ("%s with %s Not found "
                                         .formatted(getEntityClass().getSimpleName(), id)));
 
-        getRepository().deleteById(id);
+        getRepository().delete(entity);
     }
 
 

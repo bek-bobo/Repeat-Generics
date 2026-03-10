@@ -1,4 +1,4 @@
-package com.example.demo.group.mapper;
+package com.example.demo.group.group.mapper;
 
 import com.example.demo.core.coreModelMapper.CoreMapper;
 import com.example.demo.group.entity.Group;
