@@ -1,43 +1,72 @@
 package com.example.demo.group;
 
 
+import com.example.demo.core.coreModelMapper.CoreMapper;
 import com.example.demo.core.customExeptionHandler.BusinessRuleException;
 import com.example.demo.core.customExeptionHandler.GroupNotFoundException;
 import com.example.demo.core.customExeptionHandler.UserNotFoundException;
+import com.example.demo.core.repository.CoreRepository;
+import com.example.demo.core.service.CoreService;
 import com.example.demo.group.entity.Group;
 import com.example.demo.group.entity.GroupStatus;
+import com.example.demo.group.group.mapper.GroupMapper;
 import com.example.demo.group.vos.*;
-
+import com.example.demo.rsql.SpecificationBuilder;
 import com.example.demo.user.UserRepository;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.entity.UserStatus;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 
 @Service
 @RequiredArgsConstructor
-public class GroupService {
+public class GroupService extends CoreService<UUID, Group, GroupResponseVO, GroupCreateVO, GroupUpdateVO> {
     private final GroupRepository groupRepository;
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final GroupMapper groupMapper;
+
+    @Override
+    protected CoreMapper<Group, GroupCreateVO, GroupResponseVO, GroupUpdateVO> getCoreMapper() {
+        return groupMapper;
+    }
+
+    @Override
+    protected CoreRepository<Group, UUID> getRepository() {
+        return groupRepository;
+    }
+
+    @Override
+    protected Class<Group> getEntityClass() {
+        return Group.class;
+    }
 
 
-    @Transactional
-    public GroupResponseVO createGroup(GroupCreateVO groupCreateVO) {
+    @Override
+    protected GroupResponseVO internalCreate(GroupCreateVO groupCreateVO) {
+        Group group = groupMapper.fromCreateToEntity(groupCreateVO);
 
-        Group group = new Group();
-        group.setName(groupCreateVO.getName());
-        group.setDescription(groupCreateVO.getDescription());
         group.setGroupStatus(GroupStatus.PLANNED);
 
         Group saved = groupRepository.save(group);
-        return modelMapper.map(saved, GroupResponseVO.class);
+
+        return groupMapper.convertToResponseVO(saved);
+    }
+
+    @Override
+    protected GroupResponseVO internalUpdate(UUID uuid, GroupUpdateVO updateVO) {
+        Group entity = getGroupOrThrow(uuid);
+
+        Group group = groupMapper.fromUpdateToEntity(updateVO, entity);
+        Group saved = groupRepository.save(group);
+
+        return groupMapper.convertToResponseVO(saved);
     }
 
     @Transactional
@@ -51,27 +80,12 @@ public class GroupService {
         user.setUserStatus(UserStatus.ACTIVE);
         group.addUser(user);
 
-        return modelMapper.map(group, GroupWithUsersResponseVO.class);
+        return groupMapper.toGroupWithUsersResponseVO(group);
     }
 
-    @Transactional
-    public GroupResponseVO getGroup(UUID id) {
-        Group group = groupRepository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
-        return modelMapper.map(group, GroupResponseVO.class);
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public GroupWithUsersResponseVO getGroupWithUsers(UUID id) {
-        Group group = groupRepository.findById(id).orElseThrow(() -> new GroupNotFoundException(id));
-        return modelMapper.map(group, GroupWithUsersResponseVO.class);
-    }
-
-    @Transactional
-    public GroupResponseVO updateGroup(UUID id, GroupUpdateVO updateVO) {
-        Group group = checkGroupUpdates(getGroupOrThrow(id), updateVO);
-
-        Group saved = groupRepository.save(group);
-        return modelMapper.map(saved, GroupResponseVO.class);
+        return groupMapper.toGroupWithUsersResponseVO(getGroupOrThrow(id));
     }
 
     @Transactional
@@ -81,7 +95,7 @@ public class GroupService {
         User user = getUserOrThrow(deleteUserFromGroup.getUserId());
 
         if (!group.getUsers().contains(user)) {
-            throw new IllegalStateException("User is not in this group");
+            throw new BusinessRuleException("User with this %s is not in this group %s".formatted(user.getId(), group.getId()));
         }
 
         group.removeUser(user);
@@ -93,43 +107,29 @@ public class GroupService {
 
         Group group = getGroupOrThrow(groupId);
 
-        for (User user : group.getUsers()) {
+        group.getUsers().forEach(user -> {
             user.setGroup(null);
             user.setUserStatus(UserStatus.WAITING);
-        }
+        });
 
-        group.getUsers().clear();
         groupRepository.delete(group);
     }
 
-    @Transactional
-    public List<GroupResponseVO> getAllGroup() {
-        return groupRepository.findAll()
-                .stream()
-                .map(group -> modelMapper.map(group, GroupResponseVO.class))
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<GroupWithUsersResponseVO> getAllGroupWithUsers(String predicate, Pageable pageable) {
 
-    }
+        Specification<Group> specification = SpecificationBuilder.build(predicate);
+        Page<Group> pages;
 
-    @Transactional
-    public List<GroupWithUsersResponseVO> getAllGroupWithUsers() {
-        return groupRepository.findAll()
-                .stream()
-                .map(group -> modelMapper.map(group, GroupWithUsersResponseVO.class))
-                .toList();
-    }
-
-
-    private Group checkGroupUpdates(Group group, GroupUpdateVO updateVO) {
-        if (updateVO.getName() != null) {
-            group.setName(updateVO.getName());
-        }
-        if (updateVO.getDescription() != null) {
-            group.setDescription(updateVO.getDescription());
+        if (specification == null) {
+            pages = groupRepository.findAll(pageable);
+        } else {
+            pages = groupRepository.findAll(specification, pageable);
         }
 
-        return group;
+        return pages.map(groupMapper::toGroupWithUsersResponseVO);
     }
+
 
     private Group getGroupOrThrow(UUID groupId) {
         return groupRepository.findById(groupId)
@@ -155,5 +155,6 @@ public class GroupService {
             throw new BusinessRuleException("Group is full");
         }
     }
+
 
 }

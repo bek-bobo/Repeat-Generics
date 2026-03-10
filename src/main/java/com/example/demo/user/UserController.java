@@ -25,24 +25,22 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<UserResponseVO> createUser(@Valid @RequestBody UserCreateVO userCreateVO) {
 
-        UserResponseVO userResponseVO = userService.create(userCreateVO);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(userResponseVO);
+                .body(userService.create(userCreateVO));
     }
 
     @GetMapping("/all")
     public ResponseEntity<Page<UserResponseVO>> getAllUser(
-            @RequestParam (required = false) String predicate,
+            @RequestParam(required = false) String predicate,
             Pageable pageable) {
 
-        return ResponseEntity.ok(userService.getAllUsers(predicate,pageable));
+        return ResponseEntity.ok(userService.getAll(predicate, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseVO> getUser(@PathVariable UUID id) {
-        return ResponseEntity.ok(userService.getUser(id));
+        return ResponseEntity.ok(userService.getById(id));
     }
 
     @PatchMapping("/update/{id}")
@@ -50,13 +48,13 @@ public class UserController {
             @PathVariable UUID id,
             @RequestBody UserUpdateVO vo) {
 
-        return ResponseEntity.ok(userService.updateUser(id, vo));
+        return ResponseEntity.ok(userService.update(id, vo));
     }
 
     @DeleteMapping("/del/{id}")
-    public ResponseEntity<Map<String,String>> deleteUser(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable UUID id) {
 
-        userService.deleteUser(id);
+        userService.delete(id);
         return ResponseEntity.ok(
                 Map.of("message", "User deleted successfully")
         );
