@@ -136,7 +136,6 @@ public class GroupService extends CoreService<UUID, Group, GroupResponseVO, Grou
         return pages.map(groupMapper::toGroupWithUsersResponseVO);
     }
 
-
     private Group getGroupOrThrow(UUID groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(() -> notFoundException(groupId));

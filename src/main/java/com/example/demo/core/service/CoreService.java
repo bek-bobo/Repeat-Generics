@@ -2,10 +2,8 @@ package com.example.demo.core.service;
 
 
 import com.example.demo.core.coreModelMapper.CoreMapper;
-import com.example.demo.core.customExeptionHandler.BusinessRuleException;
 import com.example.demo.core.repository.CoreRepository;
 import com.example.demo.rsql.SpecificationBuilder;
-import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
